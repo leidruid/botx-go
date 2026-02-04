@@ -1,0 +1,1697 @@
+openapi: 3.0.3
+info:
+  title: Express BotX API (botx-go SDK coverage)
+  version: 0.1.0
+  description: |
+    OpenAPI specification generated from the botx-go client and server handlers.
+    This spec documents the HTTP endpoints that the SDK calls (outbound) and
+    the webhook endpoints the SDK can serve (inbound).
+servers:
+  - url: https://{cts_host}
+    variables:
+      cts_host:
+        default: example.express.ms
+        description: BotX CTS base host for the bot's account.
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v2/botx/bots/{bot_id}/token:
+    get:
+      tags: [Auth]
+      summary: Obtain bot access token
+      security: []
+      parameters:
+        - name: bot_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: signature
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Token response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v1/botx/bots/catalog:
+    get:
+      tags: [Bots]
+      summary: List bots catalog
+      parameters:
+        - name: since
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Bots catalog
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BotsCatalogResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/by_huid:
+    get:
+      tags: [Users]
+      summary: Search user by HUID
+      parameters:
+        - name: user_huid
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/by_email:
+    get:
+      tags: [Users]
+      summary: Search user by email
+      parameters:
+        - name: email
+          in: query
+          required: true
+          schema: { type: string, format: email }
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      tags: [Users]
+      summary: Search users by emails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emails]
+              properties:
+                emails:
+                  type: array
+                  items: { type: string, format: email }
+      responses:
+        '200':
+          description: User profiles
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchListResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/by_login:
+    get:
+      tags: [Users]
+      summary: Search user by AD login/domain
+      parameters:
+        - name: ad_login
+          in: query
+          required: true
+          schema: { type: string }
+        - name: ad_domain
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/by_other_id:
+    get:
+      tags: [Users]
+      summary: Search user by other id
+      parameters:
+        - name: other_id
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserSearchResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/update_profile:
+    put:
+      tags: [Users]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserProfileRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResultBoolResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/users/users_as_csv:
+    get:
+      tags: [Users]
+      summary: Download users list as CSV
+      parameters:
+        - name: cts_user
+          in: query
+          required: true
+          schema: { type: boolean }
+        - name: unregistered
+          in: query
+          required: true
+          schema: { type: boolean }
+        - name: botx
+          in: query
+          required: true
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: CSV content
+          content:
+            text/csv:
+              schema:
+                type: string
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/metrics/bot_function:
+    post:
+      tags: [Metrics]
+      summary: Report bot function usage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BotFunctionRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResultBoolResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/create:
+    post:
+      tags: [Chats]
+      summary: Create chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateChatRequest' }
+      responses:
+        '200':
+          description: Chat id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateChatResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/info:
+    get:
+      tags: [Chats]
+      summary: Get chat info
+      parameters:
+        - name: group_chat_id
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Chat info
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatInfoResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/list:
+    get:
+      tags: [Chats]
+      summary: List chats
+      responses:
+        '200':
+          description: Chats list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ListChatsResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/add_user:
+    post:
+      tags: [Chats]
+      summary: Add users to chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatUsersRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/remove_user:
+    post:
+      tags: [Chats]
+      summary: Remove users from chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatUsersRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/add_admin:
+    post:
+      tags: [Chats]
+      summary: Add admins to chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatUsersRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/create_thread:
+    post:
+      tags: [Chats]
+      summary: Create thread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sync_id]
+              properties:
+                sync_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Thread id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreateThreadResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/stealth_set:
+    post:
+      tags: [Chats]
+      summary: Enable stealth mode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StealthSetRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/stealth_disable:
+    post:
+      tags: [Chats]
+      summary: Disable stealth mode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [group_chat_id]
+              properties:
+                group_chat_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/pin_message:
+    post:
+      tags: [Chats]
+      summary: Pin message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chat_id, sync_id]
+              properties:
+                chat_id: { $ref: '#/components/schemas/UUID' }
+                sync_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/chats/unpin_message:
+    post:
+      tags: [Chats]
+      summary: Unpin message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [chat_id]
+              properties:
+                chat_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/reply_event:
+    post:
+      tags: [Events]
+      summary: Reply to message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReplyEventRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/edit_event:
+    post:
+      tags: [Events]
+      summary: Edit message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EditEventRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/delete_event:
+    post:
+      tags: [Events]
+      summary: Delete message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sync_id]
+              properties:
+                sync_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/typing:
+    post:
+      tags: [Events]
+      summary: Start typing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [group_chat_id]
+              properties:
+                group_chat_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/stop_typing:
+    post:
+      tags: [Events]
+      summary: Stop typing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [group_chat_id]
+              properties:
+                group_chat_id: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/events/{sync_id}/status:
+    get:
+      tags: [Events]
+      summary: Message delivery/read status
+      parameters:
+        - name: sync_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status info
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageStatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v4/botx/notifications/direct:
+    post:
+      tags: [Notifications]
+      summary: Send message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DirectNotificationRequest' }
+      responses:
+        '200':
+          description: sync_id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DirectNotificationResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/files/upload:
+    post:
+      tags: [Files]
+      summary: Upload file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/UploadFileRequest' }
+      responses:
+        '200':
+          description: Async file
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadFileResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/files/download:
+    get:
+      tags: [Files]
+      summary: Download file
+      parameters:
+        - name: group_chat_id
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: file_id
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: is_preview
+          in: query
+          required: true
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: File content
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/openid/refresh_access_token:
+    post:
+      tags: [OpenID]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshAccessTokenRequest' }
+      responses:
+        '200':
+          description: Result flag
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResultBoolResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/smartapps/list:
+    get:
+      tags: [SmartApps]
+      summary: List smartapps
+      parameters:
+        - name: version
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Smartapps list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SmartAppsListResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/smartapps/event:
+    post:
+      tags: [SmartApps]
+      summary: Send smartapp event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppEventRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/smartapps/notification:
+    post:
+      tags: [SmartApps]
+      summary: Send smartapp notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppNotificationRequest' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v4/botx/smartapps/notification:
+    post:
+      tags: [SmartApps]
+      summary: Send smartapp custom notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppCustomNotificationRequest' }
+      responses:
+        '200':
+          description: sync_id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DirectNotificationResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v4/botx/smartapps/unread_counter:
+    post:
+      tags: [SmartApps]
+      summary: Send smartapp unread counter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppUnreadCounterRequest' }
+      responses:
+        '200':
+          description: sync_id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DirectNotificationResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v1/botx/smartapps/manifest:
+    post:
+      tags: [SmartApps]
+      summary: Send smartapp manifest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppManifestRequest' }
+      responses:
+        '200':
+          description: Manifest
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SmartAppManifestResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/smartapps/upload_file:
+    post:
+      tags: [SmartApps]
+      summary: Upload smartapp file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema: { $ref: '#/components/schemas/UploadContentRequest' }
+      responses:
+        '200':
+          description: Uploaded link
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadLinkResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/stickers/packs:
+    post:
+      tags: [Stickers]
+      summary: Create sticker pack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateStickerPackRequest' }
+      responses:
+        '200':
+          description: Sticker pack
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerPackResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+    get:
+      tags: [Stickers]
+      summary: List sticker packs
+      parameters:
+        - name: user_huid
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: limit
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: after
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Sticker packs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerPackPageResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/stickers/packs/{pack_id}:
+    get:
+      tags: [Stickers]
+      summary: Get sticker pack
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Sticker pack
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerPackResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      tags: [Stickers]
+      summary: Edit sticker pack
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EditStickerPackRequest' }
+      responses:
+        '200':
+          description: Sticker pack
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerPackResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      tags: [Stickers]
+      summary: Delete sticker pack
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/stickers/packs/{pack_id}/stickers:
+    post:
+      tags: [Stickers]
+      summary: Add sticker
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddStickerRequest' }
+      responses:
+        '200':
+          description: Sticker
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /api/v3/botx/stickers/packs/{pack_id}/stickers/{sticker_id}:
+    get:
+      tags: [Stickers]
+      summary: Get sticker
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: sticker_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Sticker
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StickerResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      tags: [Stickers]
+      summary: Delete sticker
+      parameters:
+        - name: pack_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: sticker_id
+          in: path
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatusResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /command:
+    post:
+      tags: [Webhook]
+      summary: Incoming command or message
+      description: Endpoint for incoming bot messages and system events.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptedResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /status:
+    get:
+      tags: [Webhook]
+      summary: Bot status menu
+      security: []
+      parameters:
+        - name: bot_id
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: user_huid
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Bot menu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BotMenuResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /notification/callback:
+    post:
+      tags: [Webhook]
+      summary: Async method callback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptedResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /smartapps/request:
+    post:
+      tags: [Webhook]
+      summary: Smartapp sync request
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        '200':
+          description: Smartapp response
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Error:
+      description: API error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+
+    StatusResponse:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+
+    StatusResultBoolResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result: { type: boolean }
+
+    TokenResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result: { type: string, description: Access token }
+
+    ErrorResponse:
+      type: object
+      properties:
+        status: { type: string }
+        message: { type: string }
+
+    BotsCatalogResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          required: [generated_at, bots]
+          properties:
+            generated_at: { type: string, format: date-time }
+            bots:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_huid: { $ref: '#/components/schemas/UUID' }
+                  name: { type: string }
+                  description: { type: string }
+                  avatar: { type: string }
+                  enabled: { type: boolean }
+
+    UserSearchResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result: { $ref: '#/components/schemas/UserSearch' }
+
+    UserSearchListResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: array
+          items: { $ref: '#/components/schemas/UserSearch' }
+
+    UserSearch:
+      type: object
+      properties:
+        user_huid: { $ref: '#/components/schemas/UUID' }
+        ad_login: { type: string }
+        ad_domain: { type: string }
+        name: { type: string }
+        company: { type: string }
+        company_position: { type: string }
+        department: { type: string }
+        emails: { type: array, items: { type: string } }
+        other_id: { type: string }
+        user_kind: { type: string }
+        active: { type: boolean, nullable: true }
+        description: { type: string }
+        ip_phone: { type: string }
+        manager: { type: string }
+        office: { type: string }
+        other_ip_phone: { type: string }
+        other_phone: { type: string }
+        public_name: { type: string }
+        cts_id: { $ref: '#/components/schemas/UUID' }
+        rts_id: { $ref: '#/components/schemas/UUID' }
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+
+    UpdateUserProfileRequest:
+      type: object
+      required: [user_huid]
+      properties:
+        user_huid: { $ref: '#/components/schemas/UUID' }
+        avatar: { type: object, additionalProperties: true }
+        name: { type: string }
+        public_name: { type: string }
+        company: { type: string }
+        company_position: { type: string }
+        description: { type: string }
+        department: { type: string }
+        office: { type: string }
+        manager: { type: string }
+
+    BotFunctionRequest:
+      type: object
+      required: [group_chat_id, user_huids, bot_function]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        user_huids:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+        bot_function: { type: string }
+
+    CreateChatRequest:
+      type: object
+      required: [name, chat_type, members]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        chat_type: { type: string }
+        members:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+        shared_history: { type: boolean }
+
+    CreateChatResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          required: [chat_id]
+          properties:
+            chat_id: { $ref: '#/components/schemas/UUID' }
+
+    ChatInfoResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            chat_type: { type: string }
+            creator: { $ref: '#/components/schemas/UUID' }
+            description: { type: string }
+            group_chat_id: { $ref: '#/components/schemas/UUID' }
+            inserted_at: { type: string, format: date-time }
+            members:
+              type: array
+              items:
+                type: object
+                properties:
+                  admin: { type: boolean }
+                  user_huid: { $ref: '#/components/schemas/UUID' }
+                  user_kind: { type: string }
+            name: { type: string }
+            shared_history: { type: boolean }
+
+    ListChatsResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: array
+          items:
+            type: object
+            properties:
+              group_chat_id: { $ref: '#/components/schemas/UUID' }
+              chat_type: { type: string }
+              name: { type: string }
+              description: { type: string }
+              members:
+                type: array
+                items: { $ref: '#/components/schemas/UUID' }
+              inserted_at: { type: string, format: date-time }
+              updated_at: { type: string, format: date-time }
+              shared_history: { type: boolean }
+
+    ChatUsersRequest:
+      type: object
+      required: [group_chat_id, user_huids]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        user_huids:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+
+    CreateThreadResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          required: [thread_id]
+          properties:
+            thread_id: { $ref: '#/components/schemas/UUID' }
+
+    StealthSetRequest:
+      type: object
+      required: [group_chat_id]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        disable_web: { type: boolean }
+        burn_in: { type: integer }
+        expire_in: { type: integer }
+
+    DirectNotificationRequest:
+      type: object
+      required: [group_chat_id, notification]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        notification:
+          type: object
+          required: [status, body]
+          properties:
+            status: { type: string }
+            body: { type: string }
+            metadata: { type: object, additionalProperties: true }
+            opts:
+              type: object
+              properties:
+                silent_response: { type: boolean }
+                buttons_auto_adjust: { type: boolean }
+            bubble: { $ref: '#/components/schemas/Markup' }
+            keyboard: { $ref: '#/components/schemas/Markup' }
+            mentions:
+              type: array
+              items: { $ref: '#/components/schemas/Mention' }
+        file: { $ref: '#/components/schemas/NotificationAttachment' }
+        recipients:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+        opts:
+          type: object
+          properties:
+            stealth_mode: { type: boolean }
+            notification_opts:
+              type: object
+              properties:
+                send: { type: boolean }
+                force_dnd: { type: boolean }
+
+    DirectNotificationResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          required: [sync_id]
+          properties:
+            sync_id: { $ref: '#/components/schemas/UUID' }
+
+    ReplyEventRequest:
+      type: object
+      required: [source_sync_id, reply]
+      properties:
+        source_sync_id: { $ref: '#/components/schemas/UUID' }
+        reply:
+          type: object
+          required: [status, body]
+          properties:
+            status: { type: string }
+            body: { type: string }
+            metadata: { type: object, additionalProperties: true }
+            opts:
+              type: object
+              properties:
+                silent_response: { type: boolean }
+                buttons_auto_adjust: { type: boolean }
+            bubble: { $ref: '#/components/schemas/Markup' }
+            keyboard: { $ref: '#/components/schemas/Markup' }
+            mentions:
+              type: array
+              items: { $ref: '#/components/schemas/Mention' }
+        file: { $ref: '#/components/schemas/NotificationAttachment' }
+        opts:
+          type: object
+          properties:
+            raw_mentions: { type: boolean }
+            stealth_mode: { type: boolean }
+            notification_opts:
+              type: object
+              properties:
+                send: { type: boolean }
+                force_dnd: { type: boolean }
+
+    EditEventRequest:
+      type: object
+      required: [sync_id, payload]
+      properties:
+        sync_id: { $ref: '#/components/schemas/UUID' }
+        payload:
+          type: object
+          properties:
+            body: { type: string }
+            metadata: { type: object, additionalProperties: true }
+            opts:
+              type: object
+              properties:
+                buttons_auto_adjust: { type: boolean }
+            bubble: { $ref: '#/components/schemas/Markup' }
+            keyboard: { $ref: '#/components/schemas/Markup' }
+            mentions:
+              type: array
+              items: { $ref: '#/components/schemas/Mention' }
+        file: { $ref: '#/components/schemas/NotificationAttachment' }
+        opts:
+          type: object
+          properties:
+            raw_mentions: { type: boolean }
+
+    MessageStatusResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            group_chat_id: { $ref: '#/components/schemas/UUID' }
+            sent_to:
+              type: array
+              items: { $ref: '#/components/schemas/UUID' }
+            read_by:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_huid: { $ref: '#/components/schemas/UUID' }
+                  read_at: { type: string, format: date-time }
+            received_by:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_huid: { $ref: '#/components/schemas/UUID' }
+                  received_at: { type: string, format: date-time }
+
+    UploadFileRequest:
+      type: object
+      required: [group_chat_id, meta, content]
+      properties:
+        group_chat_id: { type: string }
+        meta: { type: string, description: JSON string with optional duration/caption }
+        content:
+          type: string
+          format: binary
+
+    UploadFileResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            type: { type: string }
+            file: { type: string }
+            file_mime_type: { type: string }
+            file_id: { $ref: '#/components/schemas/UUID' }
+            file_name: { type: string }
+            file_size: { type: integer }
+            file_hash: { type: string }
+            duration: { type: integer }
+
+    RefreshAccessTokenRequest:
+      type: object
+      required: [user_huid]
+      properties:
+        user_huid: { $ref: '#/components/schemas/UUID' }
+        ref: { $ref: '#/components/schemas/UUID' }
+
+    SmartAppsListResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            phonebook_version: { type: integer }
+            smartapps:
+              type: array
+              items:
+                type: object
+                properties:
+                  app_id: { type: string }
+                  enabled: { type: boolean }
+                  id: { $ref: '#/components/schemas/UUID' }
+                  name: { type: string }
+                  avatar: { type: string }
+                  avatar_preview: { type: string }
+
+    SmartAppEventRequest:
+      type: object
+      required: [smartapp_id, group_chat_id, data, smartapp_api_version, encrypted]
+      properties:
+        ref: { $ref: '#/components/schemas/UUID' }
+        smartapp_id: { $ref: '#/components/schemas/UUID' }
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        data: { type: object, additionalProperties: true }
+        smartapp_api_version: { type: integer }
+        encrypted: { type: boolean }
+        opts: { type: object, additionalProperties: true }
+        async_files:
+          type: array
+          items: { $ref: '#/components/schemas/AsyncFile' }
+
+    SmartAppNotificationRequest:
+      type: object
+      required: [group_chat_id, smartapp_counter, smartapp_api_version]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        smartapp_counter: { type: integer }
+        smartapp_api_version: { type: integer }
+        body: { type: string }
+        opts: { type: object, additionalProperties: true }
+        meta: { type: object, additionalProperties: true }
+
+    SmartAppCustomNotificationRequest:
+      type: object
+      required: [group_chat_id, payload]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        payload:
+          type: object
+          required: [title, body]
+          properties:
+            title: { type: string }
+            body: { type: string }
+        meta: { type: object, additionalProperties: true }
+
+    SmartAppUnreadCounterRequest:
+      type: object
+      required: [group_chat_id, counter]
+      properties:
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        counter: { type: integer }
+
+    SmartAppManifestRequest:
+      type: object
+      required: [manifest]
+      properties:
+        manifest: { $ref: '#/components/schemas/SmartAppManifest' }
+
+    SmartAppManifestResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result: { $ref: '#/components/schemas/SmartAppManifest' }
+
+    UploadContentRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          format: binary
+
+    UploadLinkResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            link: { type: string }
+
+    CreateStickerPackRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        user_huid: { $ref: '#/components/schemas/UUID' }
+
+    EditStickerPackRequest:
+      type: object
+      required: [name, preview]
+      properties:
+        name: { type: string }
+        preview: { $ref: '#/components/schemas/UUID' }
+        stickers_order:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+
+    AddStickerRequest:
+      type: object
+      required: [emoji, image]
+      properties:
+        emoji: { type: string }
+        image:
+          type: string
+          description: RFC2397 data URL (image/png)
+
+    StickerPackResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            id: { $ref: '#/components/schemas/UUID' }
+            name: { type: string }
+            public: { type: boolean }
+            stickers:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { $ref: '#/components/schemas/UUID' }
+                  emoji: { type: string }
+                  link: { type: string }
+
+    StickerPackPageResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            packs:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { $ref: '#/components/schemas/UUID' }
+                  name: { type: string }
+                  public: { type: boolean }
+                  stickers_count: { type: integer }
+                  stickers_order:
+                    type: array
+                    items: { $ref: '#/components/schemas/UUID' }
+            pagination:
+              type: object
+              properties:
+                after: { type: string }
+
+    StickerResponse:
+      type: object
+      required: [status, result]
+      properties:
+        status: { type: string }
+        result:
+          type: object
+          properties:
+            id: { $ref: '#/components/schemas/UUID' }
+            emoji: { type: string }
+            link: { type: string }
+
+    AcceptedResponse:
+      type: object
+      properties:
+        status: { type: string, example: accepted }
+
+    BotMenuResponse:
+      type: object
+      properties:
+        status: { type: string }
+        commands:
+          type: array
+          items: { type: object, additionalProperties: true }
+
+    Mention:
+      type: object
+      properties:
+        user_huid: { $ref: '#/components/schemas/UUID' }
+        text: { type: string }
+
+    NotificationAttachment:
+      type: object
+      required: [file_name, data]
+      properties:
+        file_name: { type: string }
+        data:
+          type: string
+          description: RFC2397 data URL (base64)
+
+    Markup:
+      type: object
+      description: Nested array of rows with buttons
+      properties:
+        __root__:
+          type: array
+          items:
+            type: array
+            items: { $ref: '#/components/schemas/MarkupButton' }
+
+    MarkupButton:
+      type: object
+      required: [label, data, opts]
+      properties:
+        command: { type: string }
+        label: { type: string }
+        data: { type: object, additionalProperties: true }
+        opts: { $ref: '#/components/schemas/MarkupButtonOptions' }
+
+    MarkupButtonOptions:
+      type: object
+      properties:
+        silent: { type: boolean }
+        font_color: { type: string }
+        background_color: { type: string }
+        align:
+          type: string
+          enum: [left, center, right]
+        h_size: { type: integer }
+        show_alert: { type: boolean }
+        alert_text: { type: string }
+        handler: { type: string, enum: [client] }
+        link: { type: string }
+
+    AsyncFile:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [image, video, document, voice, location, contact, link, sticker]
+        file: { type: string }
+        file_mime_type: { type: string }
+        file_id: { $ref: '#/components/schemas/UUID' }
+        file_name: { type: string }
+        file_size: { type: integer }
+        file_hash: { type: string }
+        duration: { type: integer }
+
+    SmartAppManifest:
+      type: object
+      properties:
+        ios: { $ref: '#/components/schemas/SmartAppManifestMobileParams' }
+        android: { $ref: '#/components/schemas/SmartAppManifestMobileParams' }
+        aurora: { $ref: '#/components/schemas/SmartAppManifestMobileParams' }
+        web: { $ref: '#/components/schemas/SmartAppManifestWebParams' }
+        unread_counter_link: { $ref: '#/components/schemas/SmartAppManifestUnreadCounterParams' }
+
+    SmartAppManifestWebParams:
+      type: object
+      properties:
+        default_layout:
+          type: string
+          enum: [minimal, half, full]
+        expanded_layout:
+          type: string
+          enum: [minimal, half, full]
+        allowed_layouts:
+          type: array
+          items:
+            type: string
+            enum: [minimal, half, full]
+        always_pinned: { type: boolean }
+
+    SmartAppManifestMobileParams:
+      type: object
+      properties:
+        fullscreen_layout: { type: boolean }
+
+    SmartAppManifestUnreadCounterParams:
+      type: object
+      properties:
+        user_huid:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+        group_chat_id:
+          type: array
+          items: { $ref: '#/components/schemas/UUID' }
+        app_id:
+          type: array
+          items: { type: string }

@@ -1,0 +1,234 @@
+openapi: 3.0.3
+info:
+  title: Express BotX API (SDK Inbound Webhooks)
+  version: 0.1.0
+  description: Webhook endpoints served by botx-go handlers.
+servers:
+  - url: https://{bot_host}
+    variables:
+      bot_host:
+        default: bot.example.com
+security: []
+paths:
+  /command:
+    post:
+      tags: [Webhook]
+      summary: Incoming command or message
+      description: Endpoint for incoming bot messages and system events.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncomingCommandPayload' }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptedResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /status:
+    get:
+      tags: [Webhook]
+      summary: Bot status menu
+      parameters:
+        - name: bot_id
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+        - name: user_huid
+          in: query
+          required: true
+          schema: { $ref: '#/components/schemas/UUID' }
+      responses:
+        '200':
+          description: Bot menu
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BotMenuResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /notification/callback:
+    post:
+      tags: [Webhook]
+      summary: Async method callback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MethodCallback' }
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AcceptedResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+  /smartapps/request:
+    post:
+      tags: [Webhook]
+      summary: Smartapp sync request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SmartAppSyncRequest' }
+      responses:
+        '200':
+          description: Smartapp response
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SmartAppSyncResponse' }
+        default:
+          $ref: '#/components/responses/Error'
+
+components:
+  responses:
+    Error:
+      description: API error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+
+    ErrorResponse:
+      type: object
+      properties:
+        status: { type: string }
+        message: { type: string }
+
+    AcceptedResponse:
+      type: object
+      properties:
+        status: { type: string, example: accepted }
+
+    BotMenuResponse:
+      type: object
+      properties:
+        status: { type: string }
+        commands:
+          type: array
+          items: { type: object, additionalProperties: true }
+
+    MethodCallback:
+      type: object
+      required: [sync_id, status]
+      properties:
+        sync_id: { $ref: '#/components/schemas/UUID' }
+        status: { type: string }
+        reason: { type: string }
+        errors:
+          type: array
+          items: { type: string }
+        result: { type: object, additionalProperties: true }
+        error_data: { type: object, additionalProperties: true }
+
+    IncomingCommandPayload:
+      type: object
+      required: [bot_id, command]
+      properties:
+        bot_id: { $ref: '#/components/schemas/UUID' }
+        command:
+          type: object
+          description: Command message or system event.
+          properties:
+            command_type: { type: string }
+            body: { type: string }
+            data: { type: object, additionalProperties: true }
+        chat:
+          type: object
+          properties:
+            group_chat_id: { $ref: '#/components/schemas/UUID' }
+        sender:
+          type: object
+          properties:
+            user_huid: { $ref: '#/components/schemas/UUID' }
+        sync_id: { $ref: '#/components/schemas/UUID' }
+        file: { $ref: '#/components/schemas/IncomingFileAttachment' }
+        location: { $ref: '#/components/schemas/LocationAttachment' }
+        contact: { $ref: '#/components/schemas/ContactAttachment' }
+        link: { $ref: '#/components/schemas/LinkAttachment' }
+        sticker: { $ref: '#/components/schemas/StickerAttachment' }
+        mentions:
+          type: array
+          items: { $ref: '#/components/schemas/Mention' }
+        meta: { type: object, additionalProperties: true }
+        raw: { type: object, additionalProperties: true }
+
+    SmartAppSyncRequest:
+      type: object
+      required: [bot_id, group_chat_id, sender, sync_id]
+      properties:
+        bot_id: { $ref: '#/components/schemas/UUID' }
+        group_chat_id: { $ref: '#/components/schemas/UUID' }
+        sender:
+          type: object
+          properties:
+            user_huid: { $ref: '#/components/schemas/UUID' }
+        sync_id: { $ref: '#/components/schemas/UUID' }
+        data: { type: object, additionalProperties: true }
+
+    SmartAppSyncResponse:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string }
+        result: { type: object, additionalProperties: true }
+        reason: { type: string }
+        data: { type: object, additionalProperties: true }
+
+    Mention:
+      type: object
+      properties:
+        user_huid: { $ref: '#/components/schemas/UUID' }
+        text: { type: string }
+
+    IncomingFileAttachment:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [image, video, document, voice]
+        file_name: { type: string }
+        data:
+          type: string
+          description: RFC2397 data URL
+        duration: { type: integer }
+
+    LocationAttachment:
+      type: object
+      properties:
+        name: { type: string }
+        address: { type: string }
+        latitude: { type: string }
+        longitude: { type: string }
+
+    ContactAttachment:
+      type: object
+      properties:
+        name: { type: string }
+
+    LinkAttachment:
+      type: object
+      properties:
+        url: { type: string }
+        title: { type: string }
+        preview: { type: string }
+        text: { type: string }
+
+    StickerAttachment:
+      type: object
+      properties:
+        id: { type: string }
+        image_url: { type: string }
+        pack_id: { type: string }
+        emoji: { type: string }

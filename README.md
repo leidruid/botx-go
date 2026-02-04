@@ -45,6 +45,12 @@ func main() {
 - `examples/internal/callback_listener/main.go`
 - `examples/simple_auth_send/main.go`
 
+## API Specification
+
+- `api-specification/openapi.yaml` (combined)
+- `api-specification/openapi-outbound.yaml` (client calls)
+- `api-specification/openapi-inbound.yaml` (webhooks)
+
 ## Notes
 
 - Optional fields use `optional.Optional[T]`.
