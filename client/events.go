@@ -16,35 +16,35 @@ type replyEventRequest struct {
 	Reply        struct {
 		Status   string                                     `json:"status"`
 		Body     string                                     `json:"body"`
-		Metadata optional.Optional[map[string]any]          `json:"metadata,omitempty"`
-		Opts     optional.Optional[notificationMessageOpts] `json:"opts,omitempty"`
-		Bubble   optional.Optional[models.APIMarkup]        `json:"bubble,omitempty"`
-		Keyboard optional.Optional[models.APIMarkup]        `json:"keyboard,omitempty"`
-		Mentions optional.Optional[[]models.APIMention]     `json:"mentions,omitempty"`
+		Metadata optional.Optional[map[string]any]          `json:"metadata,omitzero"`
+		Opts     optional.Optional[notificationMessageOpts] `json:"opts,omitzero"`
+		Bubble   optional.Optional[models.APIMarkup]        `json:"bubble,omitzero"`
+		Keyboard optional.Optional[models.APIMarkup]        `json:"keyboard,omitzero"`
+		Mentions optional.Optional[[]models.APIMention]     `json:"mentions,omitzero"`
 	} `json:"reply"`
-	File optional.Optional[models.APINotificationAttachment] `json:"file,omitempty"`
+	File optional.Optional[models.APINotificationAttachment] `json:"file,omitzero"`
 	Opts struct {
 		RawMentions      bool                                      `json:"raw_mentions"`
-		StealthMode      optional.Optional[bool]                   `json:"stealth_mode,omitempty"`
-		NotificationOpts optional.Optional[notificationNestedOpts] `json:"notification_opts,omitempty"`
+		StealthMode      optional.Optional[bool]                   `json:"stealth_mode,omitzero"`
+		NotificationOpts optional.Optional[notificationNestedOpts] `json:"notification_opts,omitzero"`
 	} `json:"opts"`
 }
 
 type editEventRequest struct {
 	SyncID  uuid.UUID `json:"sync_id"`
 	Payload struct {
-		Body     optional.Optional[string]         `json:"body,omitempty"`
-		Metadata optional.Optional[map[string]any] `json:"metadata,omitempty"`
+		Body     optional.Optional[string]         `json:"body,omitzero"`
+		Metadata optional.Optional[map[string]any] `json:"metadata,omitzero"`
 		Opts     optional.Optional[struct {
-			ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitempty"`
+			ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitzero"`
 		}] `json:"opts,omitempty"`
-		Bubble   optional.Optional[models.APIMarkup]    `json:"bubble,omitempty"`
-		Keyboard optional.Optional[models.APIMarkup]    `json:"keyboard,omitempty"`
-		Mentions optional.Optional[[]models.APIMention] `json:"mentions,omitempty"`
+		Bubble   optional.Optional[models.APIMarkup]    `json:"bubble,omitzero"`
+		Keyboard optional.Optional[models.APIMarkup]    `json:"keyboard,omitzero"`
+		Mentions optional.Optional[[]models.APIMention] `json:"mentions,omitzero"`
 	} `json:"payload"`
-	File optional.Optional[models.APINotificationAttachment] `json:"file,omitempty"`
+	File optional.Optional[models.APINotificationAttachment] `json:"file,omitzero"`
 	Opts optional.Optional[struct {
-		RawMentions optional.Optional[bool] `json:"raw_mentions,omitempty"`
+		RawMentions optional.Optional[bool] `json:"raw_mentions,omitzero"`
 	}] `json:"opts,omitempty"`
 }
 
@@ -158,13 +158,13 @@ func (c *Client) EditEvent(ctx context.Context, botID uuid.UUID, syncID uuid.UUI
 	if len(mentions) > 0 {
 		reqPayload.Payload.Mentions = optional.Some(mentions)
 		reqPayload.Opts = optional.Some(struct {
-			RawMentions optional.Optional[bool] `json:"raw_mentions,omitempty"`
+			RawMentions optional.Optional[bool] `json:"raw_mentions,omitzero"`
 		}{RawMentions: optional.Some(true)})
 	}
 
 	if markupAutoAdjust.Set {
 		reqPayload.Payload.Opts = optional.Some(struct {
-			ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitempty"`
+			ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitzero"`
 		}{ButtonsAutoAdjust: markupAutoAdjust})
 	}
 

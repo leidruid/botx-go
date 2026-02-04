@@ -49,19 +49,19 @@ func (m *Markup) AddButton(btn Button, newRow bool) {
 // API models for BotX
 
 type apiButtonOptions struct {
-	Silent          optional.Optional[bool]   `json:"silent,omitempty"`
-	FontColor       optional.Optional[string] `json:"font_color,omitempty"`
-	BackgroundColor optional.Optional[string] `json:"background_color,omitempty"`
-	Align           optional.Optional[string] `json:"align,omitempty"`
-	HSize           optional.Optional[int]    `json:"h_size,omitempty"`
-	ShowAlert       optional.Optional[bool]   `json:"show_alert,omitempty"`
-	AlertText       optional.Optional[string] `json:"alert_text,omitempty"`
-	Handler         optional.Optional[string] `json:"handler,omitempty"`
-	Link            optional.Optional[string] `json:"link,omitempty"`
+	Silent          optional.Optional[bool]   `json:"silent,omitzero"`
+	FontColor       optional.Optional[string] `json:"font_color,omitzero"`
+	BackgroundColor optional.Optional[string] `json:"background_color,omitzero"`
+	Align           optional.Optional[string] `json:"align,omitzero"`
+	HSize           optional.Optional[int]    `json:"h_size,omitzero"`
+	ShowAlert       optional.Optional[bool]   `json:"show_alert,omitzero"`
+	AlertText       optional.Optional[string] `json:"alert_text,omitzero"`
+	Handler         optional.Optional[string] `json:"handler,omitzero"`
+	Link            optional.Optional[string] `json:"link,omitzero"`
 }
 
 type apiButton struct {
-	Command optional.Optional[string] `json:"command,omitempty"`
+	Command optional.Optional[string] `json:"command,omitzero"`
 	Label   string                    `json:"label"`
 	Data    map[string]any            `json:"data"`
 	Opts    apiButtonOptions          `json:"opts"`

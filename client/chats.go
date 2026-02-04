@@ -16,7 +16,7 @@ type createChatRequest struct {
 	Description   string                  `json:"description,omitempty"`
 	ChatType      models.ChatType         `json:"chat_type"`
 	Members       []uuid.UUID             `json:"members"`
-	SharedHistory optional.Optional[bool] `json:"shared_history,omitempty"`
+	SharedHistory optional.Optional[bool] `json:"shared_history,omitzero"`
 }
 
 type createChatResponse struct {

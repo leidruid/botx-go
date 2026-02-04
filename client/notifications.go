@@ -11,18 +11,18 @@ import (
 )
 
 type notificationMessageOpts struct {
-	SilentResponse    optional.Optional[bool] `json:"silent_response,omitempty"`
-	ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitempty"`
+	SilentResponse    optional.Optional[bool] `json:"silent_response,omitzero"`
+	ButtonsAutoAdjust optional.Optional[bool] `json:"buttons_auto_adjust,omitzero"`
 }
 
 type notificationNestedOpts struct {
-	Send     optional.Optional[bool] `json:"send,omitempty"`
-	ForceDND optional.Optional[bool] `json:"force_dnd,omitempty"`
+	Send     optional.Optional[bool] `json:"send,omitzero"`
+	ForceDND optional.Optional[bool] `json:"force_dnd,omitzero"`
 }
 
 type notificationOpts struct {
-	StealthMode      optional.Optional[bool]                   `json:"stealth_mode,omitempty"`
-	NotificationOpts optional.Optional[notificationNestedOpts] `json:"notification_opts,omitempty"`
+	StealthMode      optional.Optional[bool]                   `json:"stealth_mode,omitzero"`
+	NotificationOpts optional.Optional[notificationNestedOpts] `json:"notification_opts,omitzero"`
 }
 
 type directNotificationRequest struct {
@@ -30,15 +30,15 @@ type directNotificationRequest struct {
 	Notification struct {
 		Status   string                                     `json:"status"`
 		Body     string                                     `json:"body"`
-		Metadata optional.Optional[map[string]any]          `json:"metadata,omitempty"`
-		Opts     optional.Optional[notificationMessageOpts] `json:"opts,omitempty"`
-		Bubble   optional.Optional[models.APIMarkup]        `json:"bubble,omitempty"`
-		Keyboard optional.Optional[models.APIMarkup]        `json:"keyboard,omitempty"`
-		Mentions optional.Optional[[]models.APIMention]     `json:"mentions,omitempty"`
+		Metadata optional.Optional[map[string]any]          `json:"metadata,omitzero"`
+		Opts     optional.Optional[notificationMessageOpts] `json:"opts,omitzero"`
+		Bubble   optional.Optional[models.APIMarkup]        `json:"bubble,omitzero"`
+		Keyboard optional.Optional[models.APIMarkup]        `json:"keyboard,omitzero"`
+		Mentions optional.Optional[[]models.APIMention]     `json:"mentions,omitzero"`
 	} `json:"notification"`
-	File       optional.Optional[models.APINotificationAttachment] `json:"file,omitempty"`
-	Recipients optional.Optional[[]uuid.UUID]                      `json:"recipients,omitempty"`
-	Opts       optional.Optional[notificationOpts]                 `json:"opts,omitempty"`
+	File       optional.Optional[models.APINotificationAttachment] `json:"file,omitzero"`
+	Recipients optional.Optional[[]uuid.UUID]                      `json:"recipients,omitzero"`
+	Opts       optional.Optional[notificationOpts]                 `json:"opts,omitzero"`
 }
 
 type directNotificationResponse struct {

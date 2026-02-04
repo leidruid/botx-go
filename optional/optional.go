@@ -5,7 +5,7 @@ import (
 )
 
 // Optional represents a value that may be explicitly set or left absent.
-// When used with `omitempty`, absent values are omitted from JSON.
+// When used with `omitzero`, absent values are omitted from JSON.
 type Optional[T any] struct {
 	Set   bool
 	Value T
@@ -21,7 +21,7 @@ func None[T any]() Optional[T] {
 	return Optional[T]{Set: false}
 }
 
-// IsZero allows `omitempty` to omit absent values.
+// IsZero allows `omitzero` to omit absent values.
 func (o Optional[T]) IsZero() bool {
 	return !o.Set
 }
